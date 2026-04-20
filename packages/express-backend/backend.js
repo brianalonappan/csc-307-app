@@ -1,8 +1,10 @@
 import express from "express";
+import cors from "cors";
 
 const app = express();
 const port = 8000;
 
+app.use(cors());
 app.use(express.json());
 
 const users = {
@@ -49,6 +51,10 @@ const findUserByNameAndJob = (name, job) => {
 
 const findUserById = (id) =>
   users["users_list"].find((user) => user["id"] === id);
+
+const generateId = () => {
+  return Math.random().toString(36).substring(2, 8);
+};
 
 const addUser = (user) => {
   users["users_list"].push(user);
@@ -101,18 +107,21 @@ app.get("/users/:id", (req, res) => {
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
-  addUser(userToAdd);
-  res.send();
+  const newUser = {
+    ...userToAdd,
+    id: generateId()
+  };
+  addUser(newUser);
+  res.status(201).send(newUser);
 });
 
 app.delete("/users/:id", (req, res) => {
   const id = req.params["id"];
   let result = removeUserById(id);
-
   if (result === false) {
     res.status(404).send("Resource not found.");
   } else {
-    res.send();
+    res.status(204).send();
   }
 });
 
